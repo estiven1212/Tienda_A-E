@@ -9,21 +9,16 @@ API REST desarrollada en **Node.js + TypeScript + Express** con **MongoDB**, dis
 ## Tecnologías y versiones
 
 * **Node.js** 20.x
-* **TypeScript** ^5.2.2
-* **Express** ^5.1.0
-* **Mongoose** ^8.19.1
-* **JWT** ^9.0.2
-* **Swagger UI** ^5.0.1
-* **Jest** ^30.2.0 / **Supertest** ^7.1.4
+* **TypeScript** 5.2.2
+* **Express** 5.1.0
+* **Mongoose** 8.19.1
+* **JWT** 9.0.2
+* **Swagger UI** 5.0.1
+* **Jest** 30.2.0 / **Supertest** 7.1.4
 
 ---
 
 ## Instalación
-
-```bash
-# Clonar el repositorio
-git clone <URL_DEL_REPO>
-cd Tienda_AIE
 
 # Instalar dependencias
 npm install
