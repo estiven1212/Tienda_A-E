@@ -1,0 +1,459 @@
+openapi: 3.0.0
+info:
+  title: Tienda AE - API REST
+  version: 1.0.0
+  description: |
+    Documentación de la API REST para la Tienda AE  
+    Esta API permite manejar usuarios, productos, pedidos, envíos, notificaciones y carrito.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desarrollo
+
+paths:
+  /test:
+    get:
+      summary: Verifica que la API esté funcionando
+      tags: [Test]
+      responses:
+        '200':
+          description: Respuesta exitosa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API en línea
+
+  /auth/register:
+    post:
+      summary: Registrar un nuevo usuario
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                  example: Juan Pérez
+                email:
+                  type: string
+                  example: juan@example.com
+                password:
+                  type: string
+                  example: 123456
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+        '400':
+          description: Error en los datos enviados
+
+  /auth/login:
+    post:
+      summary: Iniciar sesión
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: juan@example.com
+                password:
+                  type: string
+                  example: 123456
+      responses:
+        '200':
+          description: Inicio de sesión correcto
+        '401':
+          description: Credenciales inválidas
+
+  /auth/profile:
+    get:
+      summary: Obtener perfil de usuario autenticado
+      security:
+        - bearerAuth: []
+      tags: [Auth]
+      responses:
+        '200':
+          description: Perfil del usuario
+        '401':
+          description: Token inválido o ausente
+
+  /products:
+    get:
+      summary: Listar productos
+      tags: [Products]
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de productos
+    post:
+      summary: Crear un nuevo producto
+      security:
+        - bearerAuth: []
+      tags: [Products]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, price, stock]
+              properties:
+                name:
+                  type: string
+                  example: Camiseta
+                price:
+                  type: number
+                  example: 50000
+                stock:
+                  type: number
+                  example: 20
+                description:
+                  type: string
+                  example: Camiseta blanca unisex
+                category:
+                  type: string
+                  example: Ropa
+      responses:
+        '201':
+          description: Producto creado exitosamente
+
+  /products/{id}:
+    get:
+      summary: Obtener un producto por ID
+      tags: [Products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalle del producto
+        '404':
+          description: Producto no encontrado
+    put:
+      summary: Actualizar un producto
+      security:
+        - bearerAuth: []
+      tags: [Products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                price:
+                  type: number
+                stock:
+                  type: number
+                description:
+                  type: string
+                category:
+                  type: string
+      responses:
+        '200':
+          description: Producto actualizado
+    delete:
+      summary: Eliminar un producto
+      security:
+        - bearerAuth: []
+      tags: [Products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Producto eliminado
+
+  /cart:
+    get:
+      summary: Obtener carrito actual del usuario
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Carrito actual del usuario autenticado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        product:
+                          type: string
+                        quantity:
+                          type: number
+                        price:
+                          type: number
+                  total:
+                    type: number
+                    example: 170000
+    delete:
+      summary: Vaciar carrito
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Carrito vaciado exitosamente
+
+  /cart/items:
+    post:
+      summary: Agregar producto al carrito
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productId, quantity]
+              properties:
+                productId:
+                  type: string
+                quantity:
+                  type: number
+      responses:
+        '201':
+          description: Producto agregado al carrito
+
+  /cart/items/{productId}:
+    put:
+      summary: Actualizar cantidad de un producto del carrito
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: number
+      responses:
+        '200':
+          description: Cantidad actualizada
+    delete:
+      summary: Eliminar producto del carrito
+      tags: [Cart]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Producto eliminado del carrito
+
+  /orders:
+    post:
+      summary: Crear un nuevo pedido
+      security:
+        - bearerAuth: []
+      tags: [Orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [items, address]
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productId:
+                        type: string
+                      quantity:
+                        type: number
+                address:
+                  type: string
+                  example: Calle 123 #45-67
+      responses:
+        '201':
+          description: Pedido creado exitosamente
+    get:
+      summary: Listar pedidos
+      security:
+        - bearerAuth: []
+      tags: [Orders]
+      responses:
+        '200':
+          description: Lista de pedidos
+
+  /orders/{id}:
+    get:
+      summary: Obtener pedido por ID
+      security:
+        - bearerAuth: []
+      tags: [Orders]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalle del pedido
+        '404':
+          description: Pedido no encontrado
+
+  /shipments:
+    post:
+      summary: Crear envío para un pedido
+      security:
+        - bearerAuth: []
+      tags: [Shipments]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orderId, tracking, status]
+              properties:
+                orderId:
+                  type: string
+                tracking:
+                  type: string
+                  example: ABC123XYZ
+                status:
+                  type: string
+                  example: "En tránsito"
+      responses:
+        '201':
+          description: Envío creado exitosamente
+
+  /shipments/{orderId}:
+    get:
+      summary: Obtener envío por ID de pedido
+      security:
+        - bearerAuth: []
+      tags: [Shipments]
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalle del envío
+        '404':
+          description: Envío no encontrado
+    put:
+      summary: Actualizar estado de envío
+      security:
+        - bearerAuth: []
+      tags: [Shipments]
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Estado de envío actualizado
+
+  /notifications:
+    get:
+      summary: Listar notificaciones del usuario autenticado
+      security:
+        - bearerAuth: []
+      tags: [Notifications]
+      responses:
+        '200':
+          description: Lista de notificaciones
+    post:
+      summary: Crear notificación
+      security:
+        - bearerAuth: []
+      tags: [Notifications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId, message]
+              properties:
+                userId:
+                  type: string
+                message:
+                  type: string
+      responses:
+        '201':
+          description: Notificación creada
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
